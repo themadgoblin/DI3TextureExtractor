@@ -1,0 +1,157 @@
+package main
+
+import (
+    "fmt"
+    "io/ioutil"
+    "log"
+    "os"
+    "strings"
+    "strconv"
+    "runtime"
+    "os/exec"
+    "encoding/hex"
+)
+
+func main() {
+    // checking command line
+    if runtime.GOOS != "windows" {
+        fmt.Println("Warning: This tool has been only tested on windows.")
+    }
+
+    if _, err := os.Stat("helpers\\quickbms.exe"); os.IsNotExist(err) {
+      println("Error: quickbms.exe not found in the helpers folder")
+      os.Exit(1)
+    }
+
+    if _, err := os.Stat("helpers\\disney_infinity.bms"); os.IsNotExist(err) {
+      println("Error: disney_infinity.bms not found in the helpers folder")
+      os.Exit(1)
+    }
+
+    if _, err := os.Stat("..\\DisneyInfinity3.exe"); os.IsNotExist(err) {
+      println("Error: DisneyInfinity3.exe not found. Check the documentation")
+      os.Exit(1)
+    }
+
+    if len(os.Args[1:]) != 1 {
+      println("Wrong number of arguments!")
+      println("Usage: " + os.Args[0] + " [model name]")
+      os.Exit(1)
+    }
+
+    character := os.Args[1]
+    var matchesFound = 0
+    var lastMatch = ""
+
+    // try to find one single match for the character
+    println("Trying to find: " + character)
+
+    files, err := ioutil.ReadDir("../assets/characters")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+
+    // if no parameter was pased
+    for _, f := range files {
+            if strings.Contains(f.Name() , character) {
+                fmt.Println("Match found: " + f.Name())
+                matchesFound++
+                lastMatch = f.Name()
+            }
+    }
+
+    // check if there are no matches
+    if matchesFound == 0 {
+        println("OPS! [" + character + "] was not found!")
+        os.Exit(1)
+      }
+
+    // check if there are multiple matches - This should be improved to something more nice
+    if matchesFound > 1 {
+        println("Multiple matches found! Please use a specific character name.")
+        println("Number of matches:" + strconv.Itoa(matchesFound))
+        println("Last match found:" + lastMatch)
+        os.Exit(1)
+    }
+
+    // executing quickbms to extract the character name
+
+    println("Extracting data from the character's zip file")
+    out, err := exec.Command("helpers\\quickbms.exe","-o","-q","helpers\\disney_infinity.bms","..\\assets\\characters\\"+lastMatch+"\\"+lastMatch+".zip").Output()
+    if err != nil {
+        println("something bad happened")
+        fmt.Printf("%s", err)
+        os.Exit(1)
+    }
+
+
+    output := string(out[:])
+    fmt.Println("Data extracted succesfully from: " + output)
+
+    // Opening the mtb file to find out the texture names
+    var path = lastMatch+"\\"+lastMatch+".mtb"
+    file, err := os.Open(path)
+    if err != nil {
+        log.Fatal("Error while opening file:" + path, err)
+    }
+    fmt.Printf("%s opened\n", path)
+    formatName := readNextBytes(file, 4)
+    fmt.Printf("Parsed format: %s\n", formatName)
+        if string(formatName) != "BNDL" {
+            log.Fatal("Provided mtb file seems incorrect. Header doesnt match!")
+        }
+    // Hardcoded position, lets hope its always +32 bytes after the header. Probably this will be superbroken
+    data := readNextBytes(file, 32)
+    firstTexture := readNextBytes(file, 8)
+    data = readNextBytes(file, 4)
+    _ = data // ultrahack to stop golang compiler annoy me about "file declared but not used"
+    secondTexture := readNextBytes(file, 8)
+
+    firstZipFile := hex.EncodeToString(firstTexture)[0:2]+".zip"
+    secondZipFile := hex.EncodeToString(secondTexture)[0:2]+".zip"
+
+    println("First texture:"+hex.EncodeToString(firstTexture) + " should be on:" + firstZipFile)
+    println("Second texture:"+hex.EncodeToString(secondTexture)+ " should be on:" + secondZipFile)
+
+    //extracting color texture
+    println("Trying to extract first texture")
+    // TO-DO check if the file exists
+    out, err = exec.Command("helpers\\quickbms.exe","-D","-o","-f","\"*"+hex.EncodeToString(firstTexture)+".tbody\"","helpers\\disney_infinity.bms","..\\assets\\textures\\"+firstZipFile,lastMatch).Output()
+    if err != nil {
+        println("something bad happened while trying to extract the first texture")
+        fmt.Printf("%s", err)
+        //os.Exit(1)
+    }
+    output = string(out[:])
+    fmt.Println("Output from quickbms: " + output)
+
+    // extracting normal map texture
+
+    println("Trying to extract second texture")
+    // TO-DO check if the file exists
+    out, err = exec.Command("helpers\\quickbms.exe","-D","-o","-f","\"*"+hex.EncodeToString(secondTexture)+".tbody\"","helpers\\disney_infinity.bms","..\\assets\\textures\\"+secondZipFile,lastMatch).Output()
+    if err != nil {
+        println("something bad happened while trying to extract the second texture")
+        fmt.Printf("%s", err)
+        //os.Exit(1)
+    }
+    output = string(out[:])
+    fmt.Println("Output from quickbms: " + output)
+
+
+
+
+}
+
+
+func readNextBytes(file *os.File, number int) []byte {
+    bytes := make([]byte, number)
+
+    _, err := file.Read(bytes)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    return bytes
+}
