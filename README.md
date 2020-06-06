@@ -11,6 +11,13 @@ If you dont put it on that place it will not work.
 
 ![alt text](doc/installation.jpg)
 
+## How to compile it
+This tool is coded in golang just because it will create a nice and portable exe file. This is the first time coding with this language and probably it has a LOT of bugs. Feel free to create pull requests. :)
+
+```
+go build extract.go
+```
+
 ## How to use
 Open a command prompt on the directory that extract.exe resides.
 The program expects a single parameter that will be the name of the file of the character that we want to find and extract the textures.
