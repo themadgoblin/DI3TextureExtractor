@@ -55,6 +55,12 @@ func main() {
     // if no parameter was pased
     for _, f := range files {
             if strings.Contains(f.Name() , character) {
+              if (f.Name() == character) {
+                fmt.Println("Exact match found: " + f.Name())
+                matchesFound = 1
+                lastMatch = f.Name()
+                break
+              }
                 fmt.Println("Match found: " + f.Name())
                 matchesFound++
                 lastMatch = f.Name()
