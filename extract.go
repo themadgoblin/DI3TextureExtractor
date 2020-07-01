@@ -108,7 +108,12 @@ func main() {
             log.Fatal("Provided mtb file seems incorrect. Header doesnt match!")
         }
     // Hardcoded position, lets hope its always +32 bytes after the header. Probably this will be superbroken
-    data := readNextBytes(file, 32)
+    //data := readNextBytes(file, 32)
+    data := readNextBytes(file, 24)
+    // offset 0x1c
+    numberOfTextures := readNextBytes(file, 4)
+    fmt.Printf("%T\n", numberOfTextures)
+    println("Number of textures found on the mtb file:" + strconv.Itoa(int(numberOfTextures[0]))) // Ugly hack: using just the first byte to get the number of textures
     firstTexture := readNextBytes(file, 8)
     data = readNextBytes(file, 4)
     _ = data // ultrahack to stop golang compiler annoy me about "file declared but not used"
