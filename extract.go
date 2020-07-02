@@ -110,49 +110,34 @@ func main() {
     // Hardcoded position, lets hope its always +32 bytes after the header. Probably this will be superbroken
     //data := readNextBytes(file, 32)
     data := readNextBytes(file, 24)
-    // offset 0x1c
-    numberOfTextures := readNextBytes(file, 4)
-    fmt.Printf("%T\n", numberOfTextures)
-    println("Number of textures found on the mtb file:" + strconv.Itoa(int(numberOfTextures[0]))) // Ugly hack: using just the first byte to get the number of textures
-    firstTexture := readNextBytes(file, 8)
+    // offset 0x1c number of textures
     data = readNextBytes(file, 4)
-    _ = data // ultrahack to stop golang compiler annoy me about "file declared but not used"
-    secondTexture := readNextBytes(file, 8)
+    numberOfTextures := int(data[0])
+    data = readNextBytes(file, 4)
+    println("Number of textures found on the mtb file:" + strconv.Itoa(numberOfTextures)) // Ugly hack: using just the first byte to get the number of textures
+    for i := 1; i <= int(numberOfTextures); i++ {
 
-    firstZipFile := hex.EncodeToString(firstTexture)[0:2]+".zip"
-    secondZipFile := hex.EncodeToString(secondTexture)[0:2]+".zip"
+      textureName := readNextBytes(file, 8)
+      data = readNextBytes(file, 4) // Skiping the FFFFFFFF delimiter
+      ZipFile := hex.EncodeToString(textureName)[0:2]+".zip"
+      fmt.Printf("Texture %d \n",i)
+      println("Filename :"+hex.EncodeToString(textureName) + " should be on:" + ZipFile)
+      _ = data // ultrahack to stop golang compiler annoy me about "file declared but not used"
 
-    println("First texture:"+hex.EncodeToString(firstTexture) + " should be on:" + firstZipFile)
-    println("Second texture:"+hex.EncodeToString(secondTexture)+ " should be on:" + secondZipFile)
+      println("Trying to extract the texture")
+      out, err = exec.Command("helpers\\quickbms.exe","-D","-o","-f","\"*"+hex.EncodeToString(textureName)+".tbody\"","helpers\\disney_infinity.bms","..\\assets\\textures\\"+ZipFile,lastMatch).Output()
+      if err != nil {
 
-    //extracting color texture
-    println("Trying to extract first texture")
-    // TO-DO check if the file exists
-    out, err = exec.Command("helpers\\quickbms.exe","-D","-o","-f","\"*"+hex.EncodeToString(firstTexture)+".tbody\"","helpers\\disney_infinity.bms","..\\assets\\textures\\"+firstZipFile,lastMatch).Output()
-    if err != nil {
-        println("something bad happened while trying to extract the first texture")
-        fmt.Printf("%s", err)
-        //os.Exit(1)
+          println("something bad happened while trying to extract the first texture")
+          fmt.Printf("%s", err)
+          //os.Exit(1)
+
+      }
+      output = string(out[:])
+      fmt.Println("Output from quickbms: " + output)
+
+
     }
-    output = string(out[:])
-    fmt.Println("Output from quickbms: " + output)
-
-    // extracting normal map texture
-
-    println("Trying to extract second texture")
-    // TO-DO check if the file exists
-    out, err = exec.Command("helpers\\quickbms.exe","-D","-o","-f","\"*"+hex.EncodeToString(secondTexture)+".tbody\"","helpers\\disney_infinity.bms","..\\assets\\textures\\"+secondZipFile,lastMatch).Output()
-    if err != nil {
-        println("something bad happened while trying to extract the second texture")
-        fmt.Printf("%s", err)
-        //os.Exit(1)
-    }
-    output = string(out[:])
-    fmt.Println("Output from quickbms: " + output)
-
-
-
-
 }
 
 
