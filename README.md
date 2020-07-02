@@ -6,7 +6,7 @@ Tool for extracting character textures from the DI3 game
 Backup all your files before executing this program. This software is provided without any kind of warranty. You have been warned
 
 ## How to install
-Download all the files and put them on a folder in the same directory that DisneyInfinity3.exe exists.
+Download all the files and put them on a folder in the same directory that DisneyInfinity3.exe resides.
 If you dont put it on that place it will not work. 
 
 ![alt text](doc/installation.jpg)
