@@ -28,7 +28,7 @@ The files will be extracted on a folder with the character name.
 ![alt text](doc/usage.jpg)
 
 ## Known bugs
-If we want to extract a character that has variations like avg_captainamerica or avg_falcon, it will always return more than one matches and it will not work. This will be fixed in the future.
+If we want to extract a character that has variations like avg_captainamerica or avg_falcon, it will always return more than one matches and it will not work. This will be fixed in the future. - FIXED Already
 
 There are some model files that already have some textures embeded. The tool will fail extracting the textures from the textures folder because it cannot find them... Just check the folder and subfolders of the extracted files and you will find them.
 
