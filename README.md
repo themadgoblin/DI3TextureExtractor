@@ -6,7 +6,7 @@ Tool for extracting character textures from the DI3 game
 Backup all your files before executing this program. This software is provided without any kind of warranty. You have been warned
 
 ## How to install
-Download all the files and put them on a folder in the same directory that DisneyInfinity3.exe exists.
+Download all the files and put them on a folder in the same directory that DisneyInfinity3.exe resides.
 If you dont put it on that place it will not work. 
 
 ![alt text](doc/installation.jpg)
@@ -28,7 +28,7 @@ The files will be extracted on a folder with the character name.
 ![alt text](doc/usage.jpg)
 
 ## Known bugs
-If we want to extract a character that has variations like avg_captainamerica or avg_falcon, it will always return more than one matches and it will not work. This will be fixed in the future.
+If we want to extract a character that has variations like avg_captainamerica or avg_falcon, it will always return more than one matches and it will not work. This will be fixed in the future. - FIXED Already
 
 There are some model files that already have some textures embeded. The tool will fail extracting the textures from the textures folder because it cannot find them... Just check the folder and subfolders of the extracted files and you will find them.
 
